@@ -1,0 +1,69 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Advanced WebRTC Logger</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/4.0.0/socket.io.js"></script>
+</head>
+<body>
+    <h1>Advanced WebRTC Logger</h1>
+    <button id="start">Start Logging</button>
+    <button id="stop" disabled>Stop Logging</button>
+    <pre id="log"></pre>
+
+    <script>
+        const logElement = document.getElementById('log');
+        let localPeerConnection;
+        const socket = io();
+
+        // Function to log connection events
+        function logConnectionEvent(event, peerIP) {
+            socket.emit('connection_event', { event: event, peer_ip: peerIP });
+        }
+
+        // Function to start WebRTC and logging
+        async function startLogging() {
+            logElement.textContent = 'Logging started...\n';
+            localPeerConnection = new RTCPeerConnection({
+                iceServers: [{ urls: 'stun:stun.l.google.com:19302' }] // Add STUN server
+            });
+
+            // Log ICE Candidate events
+            localPeerConnection.onicecandidate = event => {
+                if (event.candidate) {
+                    const candidate = event.candidate;
+                    const peerIP = candidate.address || 'N/A';
+                    logElement.textContent += `ICE Candidate: ${peerIP}:${candidate.port}\n`;
+                    logConnectionEvent('ICE Candidate', peerIP);
+                }
+            };
+
+            // Log connection state changes
+            localPeerConnection.onconnectionstatechange = () => {
+                logElement.textContent += `Connection State: ${localPeerConnection.connectionState}\n`;
+                logConnectionEvent('Connection State Change', localPeerConnection.connectionState);
+            };
+
+            // Start collecting stats
+            setInterval(async () => {
+                const stats = await localPeerConnection.getStats(null);
+                stats.forEach(report => {
+                    const logEntry = `Type: ${report.type}, ID: ${report.id}, Timestamp: ${report.timestamp}, Data: ${JSON.stringify(report)}\n`;
+                    logElement.textContent += logEntry;
+                    socket.emit('log_webrtc_data', { report_type: report.type, report_id: report.id, timestamp: report.timestamp, report_data: report });
+                });
+            }, 1000);
+        }
+
+        // Function to stop logging
+        function stopLogging() {
+            localPeerConnection.close();
+            logElement.textContent += 'Logging stopped.\n';
+        }
+
+        document.getElementById('start').onclick = startLogging;
+        document.getElementById('stop').onclick = stopLogging;
+    </script>
+</body>
+</html>
