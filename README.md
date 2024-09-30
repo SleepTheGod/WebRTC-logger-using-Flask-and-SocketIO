@@ -1,5 +1,7 @@
 # WebRTC Logger Using Flask and SocketIO
 
+![WebRTC Logger](https://cdn.discordapp.com/attachments/1225420924623257611/1290458180152852502/image.png?ex=66fc8855&is=66fb36d5&hm=2d3c378002de5bde82fbdad70965d3d484237d4b938a632907f8f1b04d892280&)
+
 # Overview
 This application is a comprehensive WebRTC logger built with Flask and SocketIO. It captures detailed information about WebRTC connections, including ICE candidates, connection states, and various statistics. The logger helps in analyzing WebRTC interactions and troubleshooting issues.
 
