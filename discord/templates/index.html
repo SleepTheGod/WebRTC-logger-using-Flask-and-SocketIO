@@ -1,0 +1,96 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Discord Log Submission</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f4f4f4;
+            margin: 0;
+            padding: 0;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+        }
+        .container {
+            width: 50%;
+            background-color: white;
+            padding: 20px;
+            box-shadow: 0px 4px 12px rgba(0, 0, 0, 0.1);
+            border-radius: 8px;
+        }
+        h1 {
+            text-align: center;
+            color: #333;
+        }
+        textarea {
+            width: 100%;
+            height: 200px;
+            margin: 10px 0;
+            padding: 10px;
+            border-radius: 4px;
+            border: 1px solid #ccc;
+            font-size: 16px;
+        }
+        button {
+            display: block;
+            width: 100%;
+            padding: 10px;
+            background-color: #28a745;
+            color: white;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 16px;
+        }
+        button:hover {
+            background-color: #218838;
+        }
+        .message {
+            text-align: center;
+            margin-top: 15px;
+            font-size: 14px;
+            color: green;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Discord WebRTC & RingRTC Log Submission</h1>
+        <form id="logForm">
+            <textarea id="logData" placeholder="Paste your log data here..."></textarea>
+            <select id="logType">
+                <option value="webrtc">WebRTC</option>
+                <option value="ringrtc">RingRTC</option>
+            </select>
+            <button type="submit">Submit Log</button>
+        </form>
+        <div class="message" id="responseMessage"></div>
+    </div>
+
+    <script>
+        document.getElementById('logForm').addEventListener('submit', function(event) {
+            event.preventDefault();
+            const logData = document.getElementById('logData').value;
+            const logType = document.getElementById('logType').value;
+
+            fetch(`/log/${logType}`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+                body: new URLSearchParams({ 'log_data': logData })
+            })
+            .then(response => response.json())
+            .then(data => {
+                document.getElementById('responseMessage').textContent = data.message;
+                document.getElementById('logData').value = ''; // Clear the form
+            })
+            .catch(error => {
+                document.getElementById('responseMessage').textContent = 'Error submitting log';
+            });
+        });
+    </script>
+</body>
+</html>
